@@ -113,7 +113,7 @@ new intelligence analyst. Highlight typical applications. Highlight any dual use
 Government.
 
 Provde a bullet list summary of the scientific topic related to these texts: {topic_texts}?
-Provide the summary in about 500 words. 
+Provide the summary in about 1000 words or less. 
 End with a complete sentence; the last character should be a period '.'.
 """
 
