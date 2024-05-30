@@ -92,7 +92,7 @@ I want you to act as a naming consultant for scientific topics based on keyphras
 Act like a Systems Engineering and Technical Assistance (SETA) consultant. 
 
 Return a brief but detailed description of the scientific topic and applications related to
-the scientific field desribed by the list of keyphrases. The description should be meaningful to an
+the scientific field described by the list of keyphrases. The description should be meaningful to an
 new intelligence analyst. Highlight typical applications. Highlight any dual use technologies that may be of concern to the United States
 Government.
 
@@ -102,25 +102,59 @@ Please end with a complete sentence.
 """
 
 
+
+detailed_topic_template = """
+I want you to act as a naming consultant for scientific topics based on article abstracts.
+Act like a Systems Engineering and Technical Assistance (SETA) consultant. 
+
+Return a brief but detailed description of the scientific topic and applications related to
+the scientific field described by the sample texts. The description should be meaningful to an
+new intelligence analyst. Highlight typical applications. Highlight any dual use technologies that may be of concern to the United States
+Government.
+
+Provde a bullet list summary of the scientific topic related to these texts: {topic_texts}?
+Provide the summary in about 500 words. 
+End with a complete sentence; the last character should be a period '.'.
+"""
+
+
+
+
 prompt_topic = PromptTemplate(
     input_variables=["topic_phrases"],
+  #  input_variables=["topic_texts"],
     template=topic_template,
+)
+
+
+detailed_prompt_topic = PromptTemplate(
+   # input_variables=["topic_phrases"],
+    input_variables=["topic_texts"],
+    template=detailed_topic_template,
 )
 
 chain_topic= LLMChain(llm=llm, prompt=prompt_topic)
 
-
+detailed_chain_topic= LLMChain(llm=llm, prompt=detailed_prompt_topic)
 
 def get_topic_llm_description(key_phrases:list):
     """
     takes in the key_phrases list
     and returns the openai returned description.
     """
+  #  st.write(type(key_phrases))
     topic_phrases = ", ".join(key_phrases)
     return chain_topic.run(topic_phrases=topic_phrases)
 
 
-
+def get_detailed_topic_llm_description(texts:list):
+    """
+    takes in the texts list
+    and returns the openai returned description.
+    """
+  #  st.write(type(texts))
+    topic_texts = ":: ".join(texts)
+    return detailed_chain_topic.run(topic_texts=topic_texts)
 
 
 
@@ -640,11 +674,16 @@ st.download_button(
    key='download-selected-topic-csv'
 )
 
-
+# need the information in dfinfo
 topic_keywords = df_selected_centroid['keywords'].to_list()[0]
 #st.write(topic_keywords)
-llm_topic_description = get_topic_llm_description(topic_keywords)
-st.write(llm_topic_description)
+#llm_topic_description = get_topic_llm_description(topic_keywords)
+#st.write(llm_topic_description)
+
+topic_abstracts = dfinfo[dfinfo["cluster"] == selected_cluster]['abstract'].dropna().to_list()[:50]
+#st.write(topic_abstracts[:5])
+detailed_llm_topic_description = get_detailed_topic_llm_description(topic_abstracts)
+st.write(detailed_llm_topic_description)
 
 
 st.write(f"publications in topic {selected_cluster}")
